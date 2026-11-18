@@ -8,7 +8,7 @@
 (function () {
   "use strict";
 
-  var APP_VERSION = "1.0.1";
+  var APP_VERSION = "1.0.2";
 
   var ZF = window.ZF || [];
   var FR2ZH = window.FR2ZH || {};
