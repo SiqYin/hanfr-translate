@@ -35,6 +35,7 @@ from normalize_fr import (          # noqa: E402
     fix_known_misspellings,
 )
 from nasal_style import convert_nfc  # noqa: E402
+from open_o_style import convert_keep_nasal as convert_open_o  # noqa: E402
 
 try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -140,10 +141,13 @@ else:
 def lex_to_ipa(code):
     """把 Lexique 音素编码串转成 IPA。遇到未知编码写 ? 并记入统计。
 
-    转换后统一过一遍鼻化元音改写（真实发音标法）：
-      ɛ̃ / œ̃ -> ã     ɑ̃ -> ɒ̃     ɔ̃ -> õ
-    见 tools/nasal_style.py。放在这里做，保证词库、音标词典、例句三处
-    用的是同一套音标体系，不会一个地方改了另一个没改。
+    转换后统一过两道改写，顺序不能反：
+      1. 鼻化元音改写（真实发音标法）
+         ɛ̃ / œ̃ -> ã     ɑ̃ -> ɒ̃     ɔ̃ -> õ
+      2. 开元音加下加符
+         o -> o̝        e -> e̝      （ɔ 与鼻化元音不动）
+    见 tools/nasal_style.py 与 tools/open_o_style.py。
+    放在这里做，保证词库、音标词典、例句三处用的是同一套体系。
     """
     if not code:
         return ""
@@ -155,7 +159,8 @@ def lex_to_ipa(code):
             UNKNOWN_PHON.add(c)
         else:
             out.append(v)
-    return convert_nfc("".join(out))
+    ipa = convert_nfc("".join(out))
+    return convert_open_o(ipa)
 
 
 UNKNOWN_PHON = set()

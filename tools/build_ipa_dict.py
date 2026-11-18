@@ -24,6 +24,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from nasal_style import convert_nfc          # noqa: E402
+from open_o_style import convert_keep_nasal as convert_open_o  # noqa: E402
 
 try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -86,7 +87,7 @@ def main():
                 n_bad += 1
                 continue
             # 鼻化元音改用真实发音标法（见 tools/nasal_style.py）
-            rec[k] = convert_nfc(ipa)
+            rec[k] = convert_open_o(convert_nfc(ipa))
 
     # 闭类词补齐
     for k, v in CLOSED.items():

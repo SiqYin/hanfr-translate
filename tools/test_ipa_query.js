@@ -70,9 +70,9 @@ eq(IQ.wordIpa("chien"), "ʃjã", "chien");
 eq(IQ.wordIpa("fleur"), "flœʁ", "fleur");
 eq(IQ.wordIpa("nuit"), "nɥi", "nuit");
 eq(IQ.wordIpa("temps"), "tɒ̃", "temps");
-eq(IQ.wordIpa("eau"), "o", "eau");
+eq(IQ.wordIpa("eau"), "o̝", "eau");
 eq(IQ.wordIpa("être"), "ɛtʁ", "être");
-eq(IQ.wordIpa("parler"), "paʁle", "parler");
+eq(IQ.wordIpa("parler"), "paʁle̝", "parler");
 
 // ---------------- 2. 变体字母兼容 ----------------
 console.log("【变体字母兼容】");
@@ -85,7 +85,7 @@ eq(IQ.wordIpa("sœur"), IQ.wordIpa("soeur"), "sœur = soeur");
 const e1 = IQ.wordIpa("élève");
 const e2 = IQ.wordIpa("eleve");
 eq(e2.length > 0, true, "eleve 能查到音标（去变音符号）");
-eq(["elɛv", "eləve", "ɛləve", "elɛve"].indexOf(e2) > -1, true,
+eq(["elɛv", "eləve", "ɛləve", "elɛve", "ɛləve̝"].indexOf(e2) > -1, true,
    "eleve 音标在合理集合内（实得 " + e2 + "）");
 eq(IQ.wordIpa("français"), IQ.wordIpa("francais"), "français = francais");
 eq(IQ.wordIpa("garçon"), IQ.wordIpa("garcon"), "garçon = garcon");
@@ -100,7 +100,7 @@ console.log("【词形回落】");
 has(IQ.wordIpa("maisons"), "mɛz", "复数 maisons");
 has(IQ.wordIpa("livres"), "livʁ", "复数 livres");
 // 省音缩合
-eq(IQ.wordIpa("l'eau"), "lo", "l'eau -> lo");
+eq(IQ.wordIpa("l'eau"), "lo̝", "l'eau -> lo̝");
 // 连字符复合词：法语音标不保留连字符，直接连写（peut-être -> pøtɛtʁ）
 eq(IQ.wordIpa("peut-être"), "pøtɛtʁ", "peut-être 连写");
 eq(IQ.wordIpa("peut-être").indexOf("-"), -1, "音标里不保留连字符");
@@ -115,7 +115,7 @@ has(s1.marked, ".", "整句保留句号");
 
 // 强制联诵：les amis
 const s2 = IQ.sentenceIpa("les amis");
-has(s2.marked, "lez‿ami", "les‿amis 联诵合并");
+has(s2.marked, "le̝z‿ami", "les‿amis 联诵合并");
 
 // 禁止联诵：et il
 const s3 = IQ.sentenceIpa("et il");

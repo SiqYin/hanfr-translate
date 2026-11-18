@@ -32,6 +32,7 @@ except Exception:
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from nasal_style import convert_nfc          # noqa: E402
+from open_o_style import convert_keep_nasal as convert_open_o  # noqa: E402
 
 RAW = os.path.normpath(os.path.join(ROOT, "..", "..", "02_数据管线", "原始数据"))
 LEXIQUE = os.path.join(RAW, "Lexique383.tsv")
@@ -72,8 +73,10 @@ def lex_to_ipa(code, pmap):
         if v is None:
             return None
         out.append(v)
-    # 鼻化元音改真实发音标法，与词库/音标词典保持一致
-    return convert_nfc("".join(out))
+    # 两道改写，与词库/音标词典保持一致：
+    #   1. 鼻化元音（ɛ̃ œ̃→ã, ɑ̃→ɒ̃, ɔ̃→õ）
+    #   2. o→o̝, e→e̝（ɔ 与鼻化元音不动）
+    return convert_open_o(convert_nfc("".join(out)))
 
 
 def load_lexique():
