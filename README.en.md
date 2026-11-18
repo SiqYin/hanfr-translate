@@ -108,17 +108,27 @@ The table above lets readers convert back to the traditional convention where ne
 
 ---
 
+## Interface
+
+- **Colours**: Chinese in red, French in blue, each with four tones (900 / primary / 500 / 200) for clear hierarchy
+- **Style**: Material You — large radii, per-section tinted surfaces (senses in pale rose, examples in pale blue), soft shadows, floating top bar
+- Four interface languages: 简体中文 / 繁體中文 / Français / English
+- Three themes: light / dark / system (the dark theme keeps the red-and-blue scheme)
+- Search history and translation history
+
 ## Data volume
 
 | Item | Count |
 |---|---:|
 | Chinese entries | 58,358 |
 | Entries with example | 58,193 (99.7%) |
-| Examples in total | 285,152 |
-| Liaisons annotated | 208,569 |
+| Examples in total | 383,932 |
+| Liaisons annotated | 67,814 |
 | French → Chinese entries | 49,463 |
 | Forms transcribed | 125,868 |
 | Function words hand-revised | 311 |
+
+Example coverage is **even**: 84% of entries have 4 to 10, none exceeds 5, with no skew between common and rare words.
 
 ---
 

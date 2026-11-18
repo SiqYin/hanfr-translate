@@ -137,16 +137,30 @@ def parse_lines(raw, n):
     return None
 
 
-def valid_fr(s):
-    """法语译文的基本合法性校验（不是质量校验）。"""
+def valid_fr(s, zh_sent=""):
+    """法语译文的基本合法性校验（不是质量校验）。
+
+    关键：**生僻字译文要放行**。
+      「㑇这个字现在已经很少用了。」的法语译文是
+        Le caractère « 㑇 » est aujourd'hui très peu utilisé.
+      里面本来就该保留「㑇」这个字——谚文语境里引用汉字是完全正常的。
+      早期版本一律判「含中文=非法」，导致 2,000 多条生僻字例句全部作废、
+      整批重试到熔断（实测连续 12 批失败）。
+    """
     if not s:
         return False
-    if re.search(r"[\u3400-\u4dbf\u4e00-\u9fff]", s):
+    if len(s) > 320:
         return False
-    if len(s) > 300:
+    if not re.search(r"[A-Za-zÀ-ÿ]", s):
         return False
-    # 至少要像法语：有拉丁字母
-    return bool(re.search(r"[A-Za-zÀ-ÿ]", s))
+
+    # 译文里出现的汉字，如果原句里也有，那是「引用原字」，合法
+    cjk_in_out = set(re.findall(r"[\u3400-\u4dbf\u4e00-\u9fff]", s))
+    if not cjk_in_out:
+        return True
+    cjk_in_src = set(re.findall(r"[\u3400-\u4dbf\u4e00-\u9fff]", zh_sent))
+    # 全都是原句里出现过的字 -> 允许；出现原句没有的汉字 -> 说明模型没翻译干净
+    return cjk_in_out.issubset(cjk_in_src)
 
 
 def work(batch):
@@ -165,7 +179,7 @@ def work(batch):
             ok = True
             for (zh_head, zh_s), fr in zip(batch, arr):
                 fr = fr.strip()
-                if not valid_fr(fr):
+                if not valid_fr(fr, zh_s):
                     ok = False
                     break
                 out.append({"zh": zh_head, "zh_sent": zh_s, "fr": fr,

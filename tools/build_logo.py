@@ -63,24 +63,51 @@ CHROME = find_chrome()
 def render_svg(svg_text, out_png, size, round_mask=True):
     """用 Chrome headless 把 SVG 渲染成指定尺寸 PNG。
 
-    round_mask=True 時在 SVG 外層加一個內切圓遮罩，讓成品是正圓
-    （與漢南／漢維的 README 圓形徽章口徑一致）。
+    round_mask=True 时套内切圆遮罩，并把鸢尾纹章缩到与 BewlyIris README
+    头部正圆版一致的比例。
+
+    为什么圆版要单独缩小纹章：
+      原 SVG 是**圆角方形**底，纹章占画布 0.548 × 0.662。
+      直接套圆形遮罩后，纹章相对圆形的视觉占比会显得过大——
+      BewlyIris 自己的 README 头部正是把它缩到 0.425 × 0.511 才用的。
+      这里照搬同一组数值，与上游保持视觉一致。
     """
     if not CHROME:
         return False
 
-    html = svg_text
+    m = re.search(r'viewBox="0 0 (\d+) (\d+)"', svg_text)
+    w, h = (int(m.group(1)), int(m.group(2))) if m else (1024, 1024)
+
     if round_mask:
-        # 原 SVG 是圓角方形底；套一層圓形 clip 變成正圓
-        m = re.search(r'viewBox="0 0 (\d+) (\d+)"', svg_text)
-        w, h = (m.group(1), m.group(2)) if m else ("1024", "1024")
-        body = re.sub(r"</?svg[^>]*>", "", svg_text, count=0)
-        html = (
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %s %s" width="%s" height="%s">'
-            '<defs><clipPath id="rc"><circle cx="%s" cy="%s" r="%s"/></clipPath></defs>'
-            '<g clip-path="url(#rc)">%s</g></svg>'
-            % (w, h, w, h, int(w) // 2, int(h) // 2, int(w) // 2, body)
-        )
+        # 圆形版：裁圆 + 纹章缩到 README 头部版的比例
+        #   目标：纹章占画面 0.425 宽 / 0.511 高
+        #   原纹章占 0.548 / 0.662 → 缩放系数 ≈ 0.775
+        inner = re.search(r"<g transform=\"translate\(([\d.]+),([\d.]+)\) scale\(([\d.]+)\)\">(.*?)</g>",
+                          svg_text, re.S)
+        if inner:
+            tx, ty, sc = float(inner.group(1)), float(inner.group(2)), float(inner.group(3))
+            body = inner.group(4)
+            # 纹章路径的原始 bbox（按 viewBox 1024 计）
+            xs = [float(x) for x in re.findall(r"-?\d+\.?\d*", body)]
+            # 直接用已知比例算，避免解析 path 出错
+            shrink = 0.425 / 0.5482
+            # 缩小后重新居中：以画布中心为锚点
+            cx, cy = w / 2.0, h / 2.0
+            # 原变换下纹章中心在 (cx, cy)，缩小围绕该点
+            new_tx = cx + (tx - cx) * 1  # translate 保持
+            new_ty = cy + (ty - cy) * 1
+            # 先按原平移放置，再以中心缩放
+            html = (
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d" width="%d" height="%d">'
+                '<defs><clipPath id="rc"><circle cx="%d" cy="%d" r="%d"/></clipPath>'
+                '<clipPath id="clip-content"><rect x="0" y="0" width="%d" height="%d"/></clipPath></defs>'
+                '<g clip-path="url(#rc)">%s</g></svg>'
+                % (w, h, w, h, w // 2, h // 2, w // 2, w, h, _scaled_svg(svg_text, shrink))
+            )
+        else:
+            html = _round_only(svg_text, w, h)
+    else:
+        html = svg_text
 
     with tempfile.TemporaryDirectory() as td:
         html_path = os.path.join(td, "logo.html")
@@ -102,6 +129,45 @@ def render_svg(svg_text, out_png, size, round_mask=True):
         except Exception as e:
             sys.stderr.write("  渲染 %dpx 失败：%s\n" % (size, e))
             return False
+
+
+def _round_only(svg_text, w, h):
+    body = re.sub(r"</?svg[^>]*>", "", svg_text)
+    return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d" width="%d" height="%d">'
+            '<defs><clipPath id="rc"><circle cx="%d" cy="%d" r="%d"/></clipPath></defs>'
+            '<g clip-path="url(#rc)">%s</g></svg>'
+            % (w, h, w, h, w // 2, h // 2, w // 2, body))
+
+
+def _scaled_svg(svg_text, shrink):
+    """把纹章按 shrink 系数围绕画布中心缩小，底与遮罩保持原样。"""
+    m = re.search(r'viewBox="0 0 (\d+) (\d+)"', svg_text)
+    w, h = (int(m.group(1)), int(m.group(2))) if m else (1024, 1024)
+    # 取出 defs（渐变）与 rect（底）
+    defs = re.search(r"<defs>.*?</defs>", svg_text, re.S)
+    rect = re.search(r"<rect[^>]*/>", svg_text)
+    inner = re.search(r"<g transform=\"translate\(([\d.]+),([\d.]+)\) scale\(([\d.]+)\)\">(.*?)</g>",
+                      svg_text, re.S)
+    out = []
+    if defs:
+        out.append(defs.group(0))
+    if rect:
+        out.append(rect.group(0))
+    if inner:
+        tx, ty, sc = float(inner.group(1)), float(inner.group(2)), float(inner.group(3))
+        body = inner.group(4)
+        # 围绕画布中心 (w/2, h/2) 缩小：
+        #   新变换 = 先平移到中心，再缩放，再平移回去
+        cx, cy = w / 2.0, h / 2.0
+        # 原纹章在画布上的中心
+        mx = tx + 850 * sc / 2.0
+        my = ty + 1026 * sc / 2.0
+        out.append(
+            '<g transform="translate(%.2f,%.2f) scale(%.6f) translate(%.2f,%.2f)">'
+            '<g transform="translate(%.2f,%.2f) scale(%.6f)">%s</g></g>'
+            % (cx, cy, shrink, -cx, -cy, tx, ty, sc, body)
+        )
+    return "".join(out)
 
 
 def make_ico(pngs, out_ico):

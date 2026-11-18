@@ -7,7 +7,7 @@ function createWindow() {
     height: 900,
     minWidth: 380,
     minHeight: 560,
-    backgroundColor: "#faf8f5",
+    backgroundColor: "#eef3f9",
     title: "漢法辭典",
     icon: path.join(__dirname, "icon.png"),
     autoHideMenuBar: true,

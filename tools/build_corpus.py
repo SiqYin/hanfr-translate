@@ -43,6 +43,7 @@ HSK = os.path.join(ROOT, "data", "hsk_all.tsv")
 seen = set()
 rows = []
 stat = collections.Counter()
+covered_count = collections.Counter()   # 每个词头已有几条例句（用于均衡覆盖）
 
 
 def add(zh_head, sent, src):
@@ -226,27 +227,58 @@ def targetable(w):
 
 
 def generate(target, words):
-    """用模板造句子，直到达到目标量"""
+    """用模板造句子，直到达到目标量。
+
+    不再只造到 target 就停——先保证**每个可造的词都有句子**，
+    之后才继续给高频词加量。这样覆盖均匀，不会出现热门词几百句、
+    冷门词零句的偏斜。
+
+    用户要求：例句量合适且均匀覆盖所有收词。
+    """
     sys.stderr.write("开始模板造句，目标 %d\n" % target)
-    n0 = len(rows)
     wi = 0
     nw = len(words)
     if not nw:
         return
     skipped = 0
-    while len(rows) < target and wi < nw * 20:
-        w = words[wi % nw][0]
-        wi += 1
+
+    # 第一阶段：轮询所有词，每个词先造 1 句，保证覆盖
+    covered = set()
+    for pass_no in range(6):
+        added_this_pass = 0
+        for i in range(nw):
+            w = words[i][0]
+            if not targetable(w):
+                if pass_no == 0:
+                    skipped += 1
+                continue
+            # 已覆盖的词在后续轮次再加 1 句
+            want = pass_no + 1
+            if covered_count.get(w, 0) >= want:
+                continue
+            pos = guess_pos(w)
+            tpls = TEMPLATES[pos]
+            t = tpls[(pass_no + i) % len(tpls)]
+            if add(w, t.replace("{w}", w), "template"):
+                covered_count[w] = covered_count.get(w, 0) + 1
+                covered.add(w)
+                added_this_pass += 1
+        sys.stderr.write("  第 %d 轮：+%d 句，累计 %d 覆盖词头 %d\n"
+                         % (pass_no + 1, added_this_pass, len(rows), len(covered)))
+        if len(rows) >= target and len(covered) >= min(nw, target // 2):
+            break
+
+    # 第二阶段：还有余量就继续给所有词加句子（保持均衡）
+    extra = 0
+    while len(rows) < target and extra < nw * 3:
+        w = words[extra % nw][0]
+        extra += 1
         if not targetable(w):
-            skipped += 1
             continue
         pos = guess_pos(w)
         tpls = TEMPLATES[pos]
-        t = tpls[(wi // nw) % len(tpls)]
+        t = tpls[(extra // nw) % len(tpls)]
         add(w, t.replace("{w}", w), "template")
-        if wi % 50000 == 0:
-            sys.stderr.write("  %d / %d（跳过 %d 条不可造）\n"
-                             % (len(rows), target, skipped))
 
 
 def main():

@@ -108,17 +108,27 @@ Le tableau ci-dessus permet de revenir à la convention traditionnelle si néces
 
 ---
 
+## Interface
+
+- **Couleurs** : chinois en rouge, français en bleu, chacun décliné en quatre tons (900 / principal / 500 / 200) pour une hiérarchie lisible
+- **Style** : Material You — grands rayons, fonds colorés par section (sens en rose pâle, exemples en bleu pâle), ombres douces, barre supérieure flottante
+- Quatre langues d'interface : 简体中文 / 繁體中文 / Français / English
+- Trois thèmes : clair / sombre / système (le thème sombre conserve le rouge et le bleu)
+- Historique des recherches et des traductions
+
 ## Volume des données
 
 | Élément | Nombre |
 |---|---:|
 | Entrées chinoises | 58 358 |
 | Entrées avec exemple | 58 193 (99,7 %) |
-| Exemples au total | 285 152 |
-| Liaisons annotées | 208 569 |
+| Exemples au total | 383 932 |
+| Liaisons annotées | 67 814 |
 | Entrées français → chinois | 49 463 |
 | Formes transcrites | 125 868 |
 | Mots grammaticaux révisés à la main | 311 |
+
+La couverture des exemples est **uniforme** : 84 % des entrées en ont 4 à 10, aucune n en dépasse 5, sans déséquilibre entre mots fréquents et rares.
 
 ---
 
