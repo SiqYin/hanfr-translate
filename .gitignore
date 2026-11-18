@@ -1,0 +1,49 @@
+# 依赖
+node_modules/
+
+# 构建产物
+release/
+release-out/
+release-100/
+dist/
+out/
+*.exe
+*.apk
+*.zip
+*.blockmap
+
+# 签名密钥（不入库，只存归档与 CI Secrets）
+android/keystore/
+*.jks
+
+# 原始数据（体积大，见 02_数据管线/原始数据）
+data/raw/
+data/clean/
+
+# 生成缓存（可重跑）
+data/cache/*.jsonl
+data/cache/*.log
+data/*_src.json
+data/zhfr_report.tsv
+data/zhfr_stats.json
+data/g2p_errors.tsv
+data/cfdict_defects.tsv
+data/untargetable.tsv
+data/coverage_gap.tsv
+data/corpus_zh.jsonl
+data/hsk_all.tsv
+data/modern_chinese_words.tsv
+
+# 临时
+__pycache__/
+*.pyc
+*.log
+.DS_Store
+Thumbs.db
+docs/screenshots/
+
+# 注意：以下文件必须入库，不要忽略
+#   app/zhfr.js     词库（28 MB）
+#   app/fr2zh.js    反查（1.5 MB）
+#   app/ipa.js      音标词典（6 MB）
+#   app/fonts/gentium-regular.woff2

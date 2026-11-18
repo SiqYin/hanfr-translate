@@ -1,0 +1,50 @@
+{
+  "results": [
+    {
+      "batch": 8,
+      "ok": 0,
+      "fail": 3,
+      "per_sent_ms": null,
+      "sent_per_sec": 0
+    },
+    {
+      "batch": 16,
+      "ok": 3,
+      "fail": 0,
+      "avg_call_s": 7.1,
+      "per_sent_ms": 442.0,
+      "sent_per_sec": 2.3
+    },
+    {
+      "batch": 24,
+      "ok": 3,
+      "fail": 0,
+      "avg_call_s": 26.5,
+      "per_sent_ms": 1105.0,
+      "sent_per_sec": 0.9
+    },
+    {
+      "batch": 32,
+      "ok": 3,
+      "fail": 0,
+      "avg_call_s": 43.6,
+      "per_sent_ms": 1362.0,
+      "sent_per_sec": 0.7
+    },
+    {
+      "batch": 48,
+      "ok": 0,
+      "fail": 3,
+      "per_sent_ms": null,
+      "sent_per_sec": 0
+    }
+  ],
+  "best": {
+    "batch": 16,
+    "ok": 3,
+    "fail": 0,
+    "avg_call_s": 7.1,
+    "per_sent_ms": 442.0,
+    "sent_per_sec": 2.3
+  }
+}

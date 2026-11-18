@@ -1,0 +1,51 @@
+{
+  "name": "hanfr-dict",
+  "version": "1.0.0",
+  "private": true,
+  "description": "漢法辭典 — 中法雙向詞典，法語詞附 IPA 音標，例句標註聯誦",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "serve": "python tools/serve.py 5200",
+    "dist:win": "electron-builder --win nsis --config.directories.output=release-out",
+    "test:liaison": "node tools/test_liaison.js",
+    "test:i18n": "node tools/check_i18n.js",
+    "test:ui": "node tools/ui_test.js",
+    "qa": "python tools/qa_check.py"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8",
+    "puppeteer-core": "^25.16.0"
+  },
+  "build": {
+    "appId": "cn.siqyin.hanfrdict",
+    "productName": "漢法辭典",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "app/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false,
+      "createDesktopShortcut": true
+    },
+    "artifactName": "HanFrDict-setup.${ext}"
+  }
+}

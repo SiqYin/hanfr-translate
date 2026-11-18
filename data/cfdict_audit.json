@@ -1,0 +1,187 @@
+{
+  "entries": 60438,
+  "total_glosses": 102201,
+  "defects": {
+    "too_long": 599,
+    "latin_binomial": 745,
+    "class_label": 107,
+    "looks_english": 60,
+    "has_chem_formula": 6,
+    "paren_unbalanced": 51,
+    "triple_letter": 11,
+    "has_cjk": 4
+  },
+  "defect_rate": {
+    "too_long": 0.0059,
+    "latin_binomial": 0.0073,
+    "class_label": 0.001,
+    "looks_english": 0.0006,
+    "has_chem_formula": 0.0001,
+    "paren_unbalanced": 0.0005,
+    "triple_letter": 0.0001,
+    "has_cjk": 0.0
+  },
+  "unknown_french_words": 9805,
+  "top_unknown": [
+    [
+      "d'un",
+      356
+    ],
+    [
+      "d'une",
+      309
+    ],
+    [
+      "qqn",
+      292
+    ],
+    [
+      "qch",
+      184
+    ],
+    [
+      "fig",
+      113
+    ],
+    [
+      "d'eau",
+      95
+    ],
+    [
+      "l'eau",
+      90
+    ],
+    [
+      "c'est",
+      54
+    ],
+    [
+      "l'argent",
+      48
+    ],
+    [
+      "l'autre",
+      43
+    ],
+    [
+      "l'année",
+      41
+    ],
+    [
+      "l'air",
+      41
+    ],
+    [
+      "qu'on",
+      41
+    ],
+    [
+      "wang",
+      38
+    ],
+    [
+      "n'est",
+      34
+    ],
+    [
+      "s'en",
+      33
+    ],
+    [
+      "zhang",
+      33
+    ],
+    [
+      "d'écriture",
+      32
+    ],
+    [
+      "d'esprit",
+      32
+    ],
+    [
+      "l'oeil",
+      32
+    ],
+    [
+      "d'accord",
+      31
+    ],
+    [
+      "l'on",
+      31
+    ],
+    [
+      "d'argent",
+      31
+    ],
+    [
+      "d'or",
+      30
+    ],
+    [
+      "l'esprit",
+      30
+    ],
+    [
+      "the",
+      28
+    ],
+    [
+      "d'oeil",
+      27
+    ],
+    [
+      "l'étranger",
+      27
+    ],
+    [
+      "d'autre",
+      26
+    ],
+    [
+      "xian",
+      25
+    ],
+    [
+      "shan",
+      25
+    ],
+    [
+      "liu",
+      25
+    ],
+    [
+      "n'importe",
+      23
+    ],
+    [
+      "of",
+      23
+    ],
+    [
+      "wu",
+      23
+    ],
+    [
+      "kwukyel",
+      22
+    ],
+    [
+      "l'amour",
+      22
+    ],
+    [
+      "l'aise",
+      22
+    ],
+    [
+      "d'état",
+      22
+    ],
+    [
+      "s'occuper",
+      21
+    ]
+  ]
+}

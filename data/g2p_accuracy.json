@@ -1,0 +1,57 @@
+{
+  "sample": 3000,
+  "exact_match": 1513,
+  "exact_rate": 0.5043,
+  "near_match": 194,
+  "near_rate": 0.569,
+  "g2p_converged": 2998,
+  "g2p_converged_rate": 0.9993,
+  "by_word_length": {
+    "2": {
+      "match": 1,
+      "total": 1,
+      "rate": 1.0
+    },
+    "3": {
+      "match": 11,
+      "total": 18,
+      "rate": 0.6111
+    },
+    "4": {
+      "match": 37,
+      "total": 56,
+      "rate": 0.6607
+    },
+    "5": {
+      "match": 88,
+      "total": 137,
+      "rate": 0.6423
+    },
+    "6": {
+      "match": 161,
+      "total": 263,
+      "rate": 0.6122
+    },
+    "7": {
+      "match": 214,
+      "total": 376,
+      "rate": 0.5691
+    },
+    "8": {
+      "match": 252,
+      "total": 474,
+      "rate": 0.5316
+    },
+    "9": {
+      "match": 261,
+      "total": 503,
+      "rate": 0.5189
+    },
+    "10": {
+      "match": 488,
+      "total": 1172,
+      "rate": 0.4164
+    }
+  },
+  "verdict": "不可用：准确率不足，用了等于编造"
+}

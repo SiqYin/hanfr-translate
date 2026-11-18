@@ -1,0 +1,122 @@
+[
+  {
+    "label": "mobile",
+    "view": "dict",
+    "q": "水",
+    "ok": true,
+    "overflow": false,
+    "senses": 2,
+    "ipas": 4,
+    "pending": 2,
+    "lias": 0,
+    "hero": "水shuǐ1eau/o/n.f.2liquide/likid/n.m.例句请喝杯水，润润嗓子。Veuillez boir"
+  },
+  {
+    "label": "mobile",
+    "view": "dict",
+    "q": "学生",
+    "ok": true,
+    "overflow": false,
+    "senses": 1,
+    "ipas": 1,
+    "pending": 0,
+    "lias": 0,
+    "hero": "学生xué sheng學生1étudiant/etydjɑ̃/n.m.例句学生们正在上课。Les élèves sont"
+  },
+  {
+    "label": "mobile",
+    "view": "dict",
+    "q": "美丽",
+    "ok": true,
+    "overflow": false,
+    "senses": 2,
+    "ipas": 3,
+    "pending": 1,
+    "lias": 0,
+    "hero": "美丽měi lì美麗1beau/bo/n.m.2belle/bɛl/n.f.例句这里的风景真美丽。Le paysage "
+  },
+  {
+    "label": "mobile",
+    "view": "dict",
+    "q": "livre",
+    "ok": true,
+    "overflow": false,
+    "senses": 1,
+    "ipas": 1,
+    "pending": 0,
+    "lias": 0,
+    "hero": "livre/livʁ/书shū对应中文书本shū běn书籍shū jí图书tú shū以「livre」开头交livre"
+  },
+  {
+    "label": "mobile",
+    "view": "dict",
+    "q": "maison",
+    "ok": true,
+    "overflow": false,
+    "senses": 1,
+    "ipas": 1,
+    "pending": 0,
+    "lias": 0,
+    "hero": "maison/mɛzɔ̃/房子fáng zi对应中文住宅zhù zhái屋wū房fáng以「maison」开头寮mais"
+  },
+  {
+    "label": "desktop",
+    "view": "dict",
+    "q": "水",
+    "ok": true,
+    "overflow": false,
+    "senses": 2,
+    "ipas": 4,
+    "pending": 2,
+    "lias": 0,
+    "hero": "水shuǐ1eau/o/n.f.2liquide/likid/n.m.例句请喝杯水，润润嗓子。Veuillez boir"
+  },
+  {
+    "label": "desktop",
+    "view": "dict",
+    "q": "学生",
+    "ok": true,
+    "overflow": false,
+    "senses": 1,
+    "ipas": 1,
+    "pending": 0,
+    "lias": 0,
+    "hero": "学生xué sheng學生1étudiant/etydjɑ̃/n.m.例句学生们正在上课。Les élèves sont"
+  },
+  {
+    "label": "desktop",
+    "view": "dict",
+    "q": "美丽",
+    "ok": true,
+    "overflow": false,
+    "senses": 2,
+    "ipas": 3,
+    "pending": 1,
+    "lias": 0,
+    "hero": "美丽měi lì美麗1beau/bo/n.m.2belle/bɛl/n.f.例句这里的风景真美丽。Le paysage "
+  },
+  {
+    "label": "desktop",
+    "view": "dict",
+    "q": "livre",
+    "ok": true,
+    "overflow": false,
+    "senses": 1,
+    "ipas": 1,
+    "pending": 0,
+    "lias": 0,
+    "hero": "livre/livʁ/书shū对应中文书本shū běn书籍shū jí图书tú shū以「livre」开头交livre"
+  },
+  {
+    "label": "desktop",
+    "view": "dict",
+    "q": "maison",
+    "ok": true,
+    "overflow": false,
+    "senses": 1,
+    "ipas": 1,
+    "pending": 0,
+    "lias": 0,
+    "hero": "maison/mɛzɔ̃/房子fáng zi对应中文住宅zhù zhái屋wū房fáng以「maison」开头寮mais"
+  }
+]
