@@ -62,12 +62,14 @@ function has(actual, needle, label) {
 console.log("音标词典词形：" + IQ.size() + "\n");
 
 // ---------------- 1. 基本单词 ----------------
+// 期望值用「真实发音」鼻化元音体系：
+//   ɛ̃/œ̃ -> ã    ɑ̃ -> ɒ̃    ɔ̃ -> õ
 console.log("【单词音标】");
-eq(IQ.wordIpa("maison"), "mɛzɔ̃", "maison");
-eq(IQ.wordIpa("chien"), "ʃjɛ̃", "chien");
+eq(IQ.wordIpa("maison"), "mɛzõ", "maison");
+eq(IQ.wordIpa("chien"), "ʃjã", "chien");
 eq(IQ.wordIpa("fleur"), "flœʁ", "fleur");
 eq(IQ.wordIpa("nuit"), "nɥi", "nuit");
-eq(IQ.wordIpa("temps"), "tɑ̃", "temps");
+eq(IQ.wordIpa("temps"), "tɒ̃", "temps");
 eq(IQ.wordIpa("eau"), "o", "eau");
 eq(IQ.wordIpa("être"), "ɛtʁ", "être");
 eq(IQ.wordIpa("parler"), "paʁle", "parler");
