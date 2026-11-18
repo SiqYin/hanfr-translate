@@ -47,3 +47,8 @@ docs/screenshots/
 #   app/fr2zh.js    反查（1.5 MB）
 #   app/ipa.js      音标词典（6 MB）
 #   app/fonts/gentium-regular.woff2
+
+release-10*/
+tools/_probe_*.py
+tools/_*.py
+tools/__pycache__/
