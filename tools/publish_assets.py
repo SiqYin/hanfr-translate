@@ -38,13 +38,24 @@ ASSETS = [
 
 
 def get_token():
-    """从 git credential 取 token（不写死、不读环境变量里的 API key）。"""
+    """取 GitHub token。
+
+    优先用环境变量 GH_TOKEN / GITHUB_TOKEN；
+    否则从 git 凭据库取（注意：git credential fill 需要 stdin 明确给空行，
+    且不能继承父进程 stdin，否则会一直等输入——实测超时 30s）。
+    """
+    for k in ("GH_TOKEN", "GITHUB_TOKEN"):
+        v = os.environ.get(k)
+        if v:
+            return v.strip()
+
     import subprocess
     try:
         p = subprocess.run(
             ["git", "credential", "fill"],
             input=b"protocol=https\nhost=github.com\n\n",
-            capture_output=True, timeout=30)
+            capture_output=True, timeout=20,
+            stdin=subprocess.PIPE)
         for line in p.stdout.decode("utf-8", "replace").splitlines():
             if line.startswith("password="):
                 return line[len("password="):].strip()
