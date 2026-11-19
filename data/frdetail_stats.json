@@ -1,14 +1,13 @@
 {
-  "zh_all_rare": 6934,
-  "with_zh": 14328,
-  "with_syn": 21784,
-  "with_pos": 25026,
-  "with_root": 19664,
-  "with_assoc": 11220,
-  "with_ant": 2586,
+  "with_senses": 34422,
+  "with_zh": 34164,
+  "with_pos": 34328,
+  "with_ipa": 34137,
+  "no_senses": 15616,
+  "with_syn": 21811,
+  "with_root": 19685,
+  "with_assoc": 11231,
+  "with_ant": 2591,
   "with_deriv": 7458,
-  "with_ph": 5688,
-  "with_also": 913,
-  "gender_pending": 860,
-  "deriv_from_root": 8612
+  "deriv_from_root": 12080
 }
