@@ -3,9 +3,12 @@
   "with_zh": 14328,
   "with_syn": 21784,
   "with_pos": 25026,
-  "with_deriv": 13363,
+  "with_root": 19664,
+  "with_assoc": 11220,
   "with_ant": 2586,
+  "with_deriv": 7458,
   "with_ph": 5688,
   "with_also": 913,
-  "gender_pending": 860
+  "gender_pending": 860,
+  "deriv_from_root": 8612
 }

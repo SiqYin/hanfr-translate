@@ -43,6 +43,9 @@ try:
 except Exception:
     pass
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from french_morph import root_of, same_family  # noqa: E402
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RAW = os.path.normpath(os.path.join(ROOT, "..", "..", "02_数据管线", "原始数据"))
 LEXIQUE = os.path.join(RAW, "Lexique383.tsv")
@@ -487,11 +490,50 @@ def main():
                     best_score = sc
                     best = rels[key]
         if best:
-            for r in ("syn", "ant", "deriv", "also"):
+            # 近义 / 反义：直接采用
+            for r in ("syn", "ant"):
                 vals = sorted(best.get(r, ()))
                 if vals:
                     rec[r] = vals[:MAX_PER_REL]
                     stats["with_" + r] += 1
+
+            # 派生：必须共享词根才算。
+            # WOLF 的 eng_derivative 语义太松，直接列会闹笑话：
+            #   eau    -> pisser / uriner      （「用水做某事」，不是派生）
+            #   grand  -> corbeau              （毫无关系）
+            # 只有共享词根的（nation - national、grand - grandeur）才是真派生。
+            raw_deriv = sorted(best.get("deriv", ()))
+            true_deriv, assoc = [], []
+            for v in raw_deriv:
+                if same_family(w, v):
+                    true_deriv.append(v)
+                else:
+                    assoc.append(v)
+            if true_deriv:
+                rec["deriv"] = true_deriv[:MAX_PER_REL]
+                stats["with_deriv"] += 1
+            # 不共享词根的降级为「联想」，仍保留但对用户诚实
+            if assoc:
+                rec["assoc"] = assoc[:MAX_PER_REL]
+                stats["with_assoc"] += 1
+
+            # also_see 归入联想
+            also = sorted(best.get("also", ()))
+            if also:
+                merged = list(rec.get("assoc", []))
+                for v in also:
+                    if v not in merged:
+                        merged.append(v)
+                rec["assoc"] = merged[:MAX_PER_REL]
+                stats["with_also"] += 1
+
+            # 词根：只在真正发生了词形变化时才记录。
+            # root_of(maison) == maison（没有可剥的前后缀），此时不写，
+            # 否则前端会显示「词根 maison」这种无意义信息。
+            rt = root_of(w)
+            if len(rt) >= 3 and rt != w:
+                rec["root"] = rt
+                stats["with_root"] += 1
 
         # 常见短语
         ph = phrases.get(w)
@@ -508,6 +550,43 @@ def main():
 
         if rec:
             DETAIL[w] = rec
+
+    # ---- 第二阶段：用构词法补足派生词 ----
+    # WOLF 的派生关系不全（不规则派生如 chanson<-chanter 是缺失的），
+    # 这里用词根分组从整个词表里反向找同族词。
+    sys.stderr.write("按词根分组补派生...\n")
+    root_groups = collections.defaultdict(list)
+    for w in words:
+        rt = root_of(w)
+        if len(rt) >= 4:
+            root_groups[rt].append(w)
+
+    # 只处理成员数合理的组，避免超大同根组（如 -tion 一堆）爆炸
+    root_added = 0
+    for rt, members in root_groups.items():
+        if len(members) < 2 or len(members) > 40:
+            continue
+        for w in members:
+            rec = DETAIL.get(w)
+            if rec is None:
+                continue
+            cur = list(rec.get("deriv", []))
+            if len(cur) >= MAX_PER_REL:
+                continue
+            for o in members:
+                if o == w or o in cur:
+                    continue
+                if len(o) <= len(w):
+                    # 优先收「更长」的派生词（nation -> national）
+                    continue
+                cur.append(o)
+                if len(cur) >= MAX_PER_REL:
+                    break
+            if cur:
+                rec["deriv"] = sorted(cur)[:MAX_PER_REL]
+                root_added += 1
+    stats["deriv_from_root"] = root_added
+    sys.stderr.write("  按词根补入 %d 个词条的派生\n" % root_added)
 
     js = "window.FRDETAIL=" + json.dumps(DETAIL, ensure_ascii=False,
                                          separators=(",", ":")) + ";"
