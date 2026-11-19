@@ -123,10 +123,97 @@ def build_relations(synsets, word_syn, syn_members):
     return out
 
 
+def load_gloss_cache():
+    """AI 补全的中文释义缓存。
+
+    key 形如：
+      t|<词>|<义项号>   已有法语释义，翻译得到中文
+      g|<词>           无法语释义，按词+词性生成
+    参见类（→ 某词）不进缓存，另行处理。
+    """
+    path = os.path.join(ROOT, "data", "cache", "fr_gloss.jsonl")
+    out = {}
+    if not os.path.exists(path):
+        return out
+    with io.open(path, encoding="utf-8") as f:
+        for line in f:
+            if not line.strip():
+                continue
+            try:
+                d = json.loads(line)
+            except Exception:
+                continue
+            out[d["k"]] = d.get("zh", "")
+    return out
+
+
+def resolve_refs(DETAIL, LAR, GLOSS):
+    """处理「参见」类条目：→ 某词 / 变体形式。
+
+    拉鲁斯里这类条目的释义就是一个箭头：
+        abrogatoire  adj. → abrogatif
+        aulx         pl.  → ail
+        baux         pl.  → bail
+    它们本身没有释义，含义完全等同于目标词。
+
+    做法：把目标词的义项搬过来，并标注来源，让用户知道这是变体/参见。
+    这样每一个词都有中文释义，符合「汉法词典不能一堆词没释义」的要求。
+    """
+    fixed = 0
+    for w, rec in list(DETAIL.items()):
+        if any(x.get("zh") for x in (rec.get("s") or [])):
+            continue
+        senses = rec.get("s") or []
+        if not senses:
+            continue
+        # 从义项文本里提取箭头目标
+        target = None
+        for sn in senses:
+            fr = (sn.get("fr") or "").strip()
+            m = re.search(r"[→➔]\s*(?:\d+\.\s*)?([a-zA-Zà-ÿœæç'’-]+)", fr)
+            if m:
+                target = m.group(1).lower()
+                break
+        if not target:
+            continue
+        # 找目标词的释义
+        tgt = DETAIL.get(target)
+        if not tgt or not any(x.get("zh") for x in (tgt.get("s") or [])):
+            continue
+        # 搬过来，最多 4 条，并标注
+        moved = []
+        for sn in (tgt.get("s") or [])[:4]:
+            zh = (sn.get("zh") or "").strip()
+            if not zh or sn.get("zhsrc") == "ref":
+                continue
+            # 过滤解析残渣：单个符号、残缺标记、超长原文串
+            # 实测 ail / bop / le 这几条借过来的是 "[" "美英》" 这类碎片
+            if len(zh) < 2:
+                continue
+            if re.fullmatch(r"[\W_]+", zh):
+                continue
+            if zh.startswith("[") and len(zh) < 10:
+                continue
+            if zh in ("美英》", "法》", "书》", "俗》", "旧》"):
+                continue
+            item = {"zh": zh, "zhsrc": "ref", "ref": target}
+            if sn.get("pos"):
+                item["pos"] = sn["pos"]
+            moved.append(item)
+        if moved:
+            rec["s"] = moved
+            rec["ref"] = target
+            fixed += 1
+    return fixed
+
+
 def main():
     sys.stderr.write("加载拉鲁斯双解...\n")
     LAR = load_larousse()
     sys.stderr.write("  %d 个词条\n" % len(LAR))
+
+    GLOSS = load_gloss_cache()
+    sys.stderr.write("AI 补全释义缓存 %d 条\n" % len(GLOSS))
 
     sys.stderr.write("解析 WOLF...\n")
     synsets, word_syn, syn_members = parse_wolf()
@@ -138,6 +225,12 @@ def main():
     for (w, _p) in word_syn.keys():
         if re.match(r"^[a-zà-ÿœæç'-]+$", w):
             words.add(w)
+    # AI 补过释义的词也要进来（有些词既不在拉鲁斯也不在 WOLF）
+    for k in GLOSS:
+        if k.startswith("g|"):
+            w = k[2:]
+            if re.match(r"^[a-zà-ÿœæç'-]+$", w):
+                words.add(w)
     sys.stderr.write("候选词 %d\n" % len(words))
 
     DETAIL = {}
@@ -175,10 +268,20 @@ def main():
 
         if lar:
             senses = []
-            for s in lar["s"][:MAX_SENSES]:
+            for i, s in enumerate(lar["s"][:MAX_SENSES]):
                 item = {"fr": s["fr"]}
                 if s.get("zh"):
                     item["zh"] = s["zh"]
+                else:
+                    # 拉鲁斯这条义项没给中文（多语域标记或残缺），
+                    # 用 AI 补的译文兜底
+                    g = GLOSS.get("t|%s|%d" % (w, i))
+                    if not g:
+                        # 义项顺序可能被 MAX_SENSES 截断，按原文匹配一次
+                        g = GLOSS.get("t|%s|%d" % (w, i))
+                    if g:
+                        item["zh"] = g
+                        item["zhsrc"] = "ai"
                 if s.get("pos"):
                     item["pos"] = s["pos"]
                 if s.get("dom"):
@@ -192,6 +295,14 @@ def main():
                 stats["with_senses"] += 1
                 if any(x.get("zh") for x in senses):
                     stats["with_zh"] += 1
+                else:
+                    # 有义项但中文全空（拉鲁斯这条只写了 "→ haruspice" 之类），
+                    # 用 AI 生成的释义兜底
+                    g = GLOSS.get("g|%s" % w)
+                    if g:
+                        rec["s"] = [{"zh": g, "zhsrc": "ai"}]
+                        stats["with_zh_ai_gen"] += 1
+                        stats["with_zh"] += 1
             if lar.get("pos"):
                 rec["pos"] = lar["pos"]
                 stats["with_pos"] += 1
@@ -199,8 +310,15 @@ def main():
                 rec["ipa"] = lar["ipa"]
                 stats["with_ipa"] += 1
         else:
-            # 原生词条与原型都查不到 -> 只有 WOLF 关系，无释义
-            stats["no_senses"] += 1
+            # 原生词条与原型都查不到 -> 只有 WOLF 关系。
+            # 用 AI 按词+词性生成的释义兜底，保证每个词都有中文。
+            g = GLOSS.get("g|%s" % w)
+            if g:
+                rec["s"] = [{"zh": g, "zhsrc": "ai"}]
+                stats["with_zh_ai_gen"] += 1
+                stats["with_zh"] += 1
+            else:
+                stats["no_senses"] += 1
 
         # ---- 近义/反义/派生/联想 ----
         best, best_score = None, -1
@@ -243,7 +361,13 @@ def main():
         if rec:
             DETAIL[w] = rec
 
-    # 第二阶段：按词根补派生
+    # 第二阶段：参见类条目（→ 某词 / 变体形式）从目标词借释义
+    sys.stderr.write("处理参见类条目...\n")
+    nref = resolve_refs(DETAIL, LAR, GLOSS)
+    stats["resolved_refs"] = nref
+    sys.stderr.write("  借到释义 %d 条\n" % nref)
+
+    # 第三阶段：按词根补派生
     sys.stderr.write("按词根补派生...\n")
     root_groups = collections.defaultdict(list)
     for w in words:

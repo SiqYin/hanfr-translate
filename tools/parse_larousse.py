@@ -160,6 +160,45 @@ def clean_zh_field(s):
     return s.strip()
 
 
+def strip_etymology(s, max_span=260):
+    """去掉开头的词源括注，支持嵌套括号与内部引号。
+
+    只处理**出现在开头或紧跟词性后**的括注，不动正文里的普通括号
+    （例如 (par opp. à appartement) 这种是释义的一部分，要保留）。
+    """
+    if not s:
+        return s
+    t = s.lstrip()
+    # 只匹配开头的括注
+    if not t.startswith("("):
+        return s
+    depth = 0
+    i = 0
+    n = min(len(t), max_span)
+    closed_at = -1
+    while i < n:
+        ch = t[i]
+        if ch == "(":
+            depth += 1
+        elif ch == ")":
+            depth -= 1
+            if depth == 0:
+                closed_at = i
+                break
+        i += 1
+    if closed_at < 0:
+        return s
+    head = t[:closed_at + 1]
+    # 判断是不是词源：含 lat./gr./de /abrév./probabl./anc./var. 等特征
+    if re.search(r"\b(lat|gr|de |abrév|probabl|anc|var\.|du |d'|ital|angl|"
+                 r"esp|all|arabe|prov|germ|onomat)", head, re.I):
+        rest = t[closed_at + 1:].lstrip(" .;:")
+        # 词源后面常跟变位类型标记 [conj. 27]，一并去掉
+        rest = re.sub(r"^\s*\[[^\]]{0,24}\]\s*[.,;:]?\s*", "", rest)
+        return rest
+    return s
+
+
 def parse_sense(block):
     """从一个义项块里切出 (法语释义, 中文对应词, 例句片段)
 
@@ -174,13 +213,23 @@ def parse_sense(block):
       标记被切开后，下游按逗号拆就得到「书」这个假释义，
       于是「书 -> ire(愤怒)」。
     """
-    # 先把标记挪到中文侧：找第一个「汉字 或 标记符」的位置
-    m = re.search(r"[\u3400-\u4dbf\u4e00-\u9fff〈〔\[]", block)
+    # 先把词源括注整段去掉。
+    #
+    # 拉鲁斯的词源括注可能很长并且含引号与嵌套括号：
+    #   (probabl. de l'anc. fr. eschiqueté “orné de carreaux…”, de eschequier “échiquier”)
+    #   (abrév. de dynamoélectrique “qui transforme l'énergie mécanique
+    #    [dynamo-] en énergie électrique”)
+    # 朴素的正则 \([^)]*\) 会在内层 ] 或 ) 处断掉，把后面的正文一并吞掉，
+    # 于是整条义项的 fr 与 zh 都丢失（实测 5 个词卡在这里）。
+    # 用括号配对扫描，支持内部引号与方括号。
+    cleaned = strip_etymology(block)
+
+    m = re.search(r"[\u3400-\u4dbf\u4e00-\u9fff〈〔\[]", cleaned)
     if m:
-        fr = block[:m.start()].strip(" .;:，、")
-        zh_rest = block[m.start():].strip()
+        fr = cleaned[:m.start()].strip(" .;:，、")
+        zh_rest = cleaned[m.start():].strip()
     else:
-        fr = block.strip(" .;:")
+        fr = cleaned.strip(" .;:")
         zh_rest = ""
 
     zh = ""
@@ -209,6 +258,29 @@ def parse_sense(block):
 
     zh = zh.strip(" 　.;,，、")
     fr = fr.strip()
+
+    # 中文侧只应包含中文与词典标记。若混入成段法语，说明切分点选错了
+    # （实测 876 条，如 "阿》Recueil des actes et des paroles..."）。
+    # 处理：在第一个「长得像法语词」的位置截断。
+    if zh:
+        m2 = re.search(r"[A-Za-zÀ-ÿ]{4,}", zh)
+        if m2:
+            zh = zh[:m2.start()]
+        # 去掉残缺的语域标记尾巴（「阿》」里的 》，「英》」里的 英》）
+        zh = re.sub(r"^[）)\]】》〉〕]+\s*", "", zh)
+        zh = re.sub(r"^[书旧俗古方文口诗法医史乐化]{1,2}[》〉〕]", "", zh)
+        zh = zh.strip(" 　.;,，、")
+
+    # 中文侧若以「[」开头，那是音标或注音被切过来了，不是释义。
+    if zh.startswith("[") or zh.startswith("［"):
+        zh = ""
+    # 中文侧若全是符号或只有 1 个字符，丢
+    if zh and len(zh) < 2:
+        zh = ""
+    # 只有中文才保留
+    if zh and not re.search(r"[\u3400-\u4dbf\u4e00-\u9fff]", zh):
+        zh = ""
+
     if not fr and not zh:
         return None
     return {"fr": fr, "zh": zh, "ex": ex[:200], "dom": domains}

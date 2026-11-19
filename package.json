@@ -1,6 +1,6 @@
 {
   "name": "hanfr-dict",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "private": true,
   "description": "漢法辭典 — 中法雙向詞典，法語詞附 IPA 音標，例句標註聯誦",
   "main": "electron/main.js",

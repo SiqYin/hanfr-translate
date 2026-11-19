@@ -1,13 +1,15 @@
 {
-  "with_senses": 34422,
-  "with_zh": 34164,
-  "with_pos": 34328,
-  "with_ipa": 34137,
-  "no_senses": 15616,
-  "with_syn": 21811,
-  "with_root": 19685,
-  "with_assoc": 11231,
-  "with_ant": 2591,
+  "with_senses": 33712,
+  "with_zh": 42832,
+  "with_pos": 33618,
+  "with_ipa": 33427,
+  "with_zh_ai_gen": 9417,
+  "with_syn": 21810,
+  "with_root": 19684,
+  "no_senses": 6564,
+  "with_assoc": 11230,
+  "with_ant": 2590,
   "with_deriv": 7458,
-  "deriv_from_root": 12080
+  "resolved_refs": 184,
+  "deriv_from_root": 11929
 }
